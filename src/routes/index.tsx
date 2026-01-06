@@ -1,39 +1,30 @@
-import { createFileRoute } from '@tanstack/react-router'
-import logo from '../logo.svg'
+import { createFileRoute, Navigate } from '@tanstack/react-router'
+import { useAuth } from '@/features/auth'
+import { Loader2 } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: RootRedirect,
 })
 
-function App() {
-  return (
-    <div className="text-center">
-      <header className="min-h-screen flex flex-col items-center justify-center bg-[#282c34] text-white text-[calc(10px+2vmin)]">
-        <img
-          src={logo}
-          className="h-[40vmin] pointer-events-none animate-[spin_20s_linear_infinite]"
-          alt="logo"
-        />
-        <p>
-          Edit <code>src/routes/index.tsx</code> and save to reload.
-        </p>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://tanstack.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn TanStack
-        </a>
-      </header>
-    </div>
-  )
+/**
+ * 루트 경로는 인증 상태에 따라 리다이렉트
+ * - 인증됨: /_authenticated/ (메인 앱)
+ * - 미인증: /auth/login
+ */
+function RootRedirect() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
+      </div>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/app" />
+  }
+
+  return <Navigate to="/auth/login" />
 }

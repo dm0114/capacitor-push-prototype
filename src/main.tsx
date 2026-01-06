@@ -1,3 +1,7 @@
+// Temporal API polyfill (Schedule-X 캘린더에 필요)
+import { Temporal } from 'temporal-polyfill'
+;(globalThis as Record<string, unknown>).Temporal = Temporal
+
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'

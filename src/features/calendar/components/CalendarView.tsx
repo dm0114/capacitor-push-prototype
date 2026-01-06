@@ -1,9 +1,19 @@
 import { useMemo, useEffect } from 'react'
+import { Temporal } from 'temporal-polyfill'
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
 import { createViewMonthGrid, createViewWeek } from '@schedule-x/calendar'
 import '@schedule-x/theme-default/dist/index.css'
 
 import { useProperties, useRows, useUpdateRow } from '@/features/database'
+
+// 날짜 문자열을 Temporal.PlainDate로 변환
+function toPlainDate(dateStr: string): Temporal.PlainDate | null {
+  try {
+    return Temporal.PlainDate.from(dateStr)
+  } catch {
+    return null
+  }
+}
 
 interface CalendarViewProps {
   databaseId: string
@@ -32,19 +42,26 @@ export function CalendarView({ databaseId, datePropertyId }: CalendarViewProps) 
   const events = useMemo(() => {
     if (!dateProperty || !titleProperty) return []
 
-    return rows
-      .filter((row) => row.values[dateProperty.id])
-      .map((row) => {
-        const dateValue = String(row.values[dateProperty.id])
-        const title = String(row.values[titleProperty.id] ?? 'Untitled')
+    const result: Array<{ id: string; title: string; start: Temporal.PlainDate; end: Temporal.PlainDate }> = []
 
-        return {
+    for (const row of rows) {
+      if (!row.values[dateProperty.id]) continue
+
+      const dateValue = String(row.values[dateProperty.id])
+      const title = String(row.values[titleProperty.id] ?? 'Untitled')
+      const plainDate = toPlainDate(dateValue)
+
+      if (plainDate) {
+        result.push({
           id: row.id,
           title,
-          start: dateValue,
-          end: dateValue,
-        }
-      })
+          start: plainDate,
+          end: plainDate,
+        })
+      }
+    }
+
+    return result
   }, [rows, dateProperty, titleProperty])
 
   // Schedule-X 캘린더 설정
@@ -53,10 +70,12 @@ export function CalendarView({ databaseId, datePropertyId }: CalendarViewProps) 
     events,
     callbacks: {
       onEventUpdate: (updatedEvent) => {
-        if (dateProperty) {
+        if (dateProperty && updatedEvent.start) {
+          // Temporal.PlainDate를 ISO 문자열로 변환
+          const dateStr = updatedEvent.start.toString()
           updateRow.mutate({
             rowId: String(updatedEvent.id),
-            values: { [dateProperty.id]: updatedEvent.start },
+            values: { [dateProperty.id]: dateStr },
           })
         }
       },

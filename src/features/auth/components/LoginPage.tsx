@@ -1,4 +1,5 @@
 import { Github, Chrome, Loader2 } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@/shared/components/ui/button'
 import {
   Card,
@@ -10,11 +11,14 @@ import {
 import { useAuth } from '../hooks/useAuth'
 
 export function LoginPage() {
+  const navigate = useNavigate()
   const { login, isLoggingIn, error, clearError } = useAuth()
 
   async function handleSocialLogin(provider: string) {
     try {
       await login(provider)
+      // 로그인 성공 시 /app으로 리다이렉트
+      navigate({ to: '/app' })
     } catch {
       // 에러는 useAuth에서 처리됨
     }

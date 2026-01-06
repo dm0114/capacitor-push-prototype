@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Loader2, Smile } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { BlockEditor } from '@/features/blocks'
+import { DatabaseView } from '@/features/database'
 import { usePage, useUpdatePage } from '../api/queries'
 
 interface PageViewProps {
@@ -100,11 +101,9 @@ export function PageView({ pageId }: PageViewProps) {
       </div>
 
       {/* 페이지 본문 */}
-      <div className="max-w-3xl mx-auto w-full px-12 pb-24 flex-1">
+      <div className={page.is_database ? 'flex-1 overflow-hidden' : 'max-w-3xl mx-auto w-full px-12 pb-24 flex-1'}>
         {page.is_database ? (
-          <div className="text-neutral-400 py-4">
-            Phase 4에서 데이터베이스 뷰가 구현됩니다.
-          </div>
+          <DatabaseView databaseId={pageId} />
         ) : (
           <BlockEditor pageId={pageId} />
         )}

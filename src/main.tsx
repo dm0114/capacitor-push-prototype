@@ -29,12 +29,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// MSW 초기화 (개발 환경에서만)
+// 모킹 초기화
 async function enableMocking() {
+  // Capacitor 네이티브 환경 체크
+  const isNative = window.location.protocol === 'capacitor:'
+
+  if (isNative) {
+    // 네이티브 앱: fetch 인터셉터 사용
+    const { setupNativeMocking } = await import('./mocks/native')
+    setupNativeMocking()
+    return
+  }
+
   if (import.meta.env.DEV) {
+    // 웹 개발 환경: MSW Service Worker 사용
     const { worker } = await import('./mocks/browser')
     return worker.start({
-      onUnhandledRequest: 'bypass', // 처리되지 않은 요청은 통과
+      onUnhandledRequest: 'bypass',
     })
   }
 }

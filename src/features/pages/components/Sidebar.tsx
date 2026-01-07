@@ -1,13 +1,16 @@
-import { PanelLeftClose, PanelLeft, Search, LogOut } from 'lucide-react'
+import { useState } from 'react'
+import { PanelLeftClose, PanelLeft, Search, LogOut, Bell } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { Button } from '@/shared/components/ui/button'
 import { useAuth } from '@/features/auth'
 import { usePageStore } from '../stores/pageStore'
 import { PageTree } from './PageTree'
+import { ReminderSettings } from '@/features/reminders/components/ReminderSettings'
 
 export function Sidebar() {
   const { user, logout, isLoggingOut } = useAuth()
   const { isSidebarOpen, sidebarWidth, toggleSidebar } = usePageStore()
+  const [isReminderOpen, setReminderOpen] = useState(false)
 
   if (!isSidebarOpen) {
     return (
@@ -75,7 +78,16 @@ export function Sidebar() {
       </div>
 
       {/* 푸터 */}
-      <div className="border-t border-neutral-200 dark:border-neutral-800 p-2">
+      <div className="border-t border-neutral-200 dark:border-neutral-800 p-2 space-y-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-neutral-500"
+          onClick={() => setReminderOpen(true)}
+        >
+          <Bell className="h-4 w-4 mr-2" />
+          회고 알림
+        </Button>
         <Button
           variant="ghost"
           size="sm"
@@ -87,6 +99,12 @@ export function Sidebar() {
           로그아웃
         </Button>
       </div>
+
+      {/* 알림 설정 모달 */}
+      <ReminderSettings
+        open={isReminderOpen}
+        onClose={() => setReminderOpen(false)}
+      />
     </aside>
   )
 }
